@@ -8,3 +8,6 @@ Play ludo in the browser alone or with friends online or offline
 ## Server
 
 The client expects a server that has a websocket connection and sends the data defined in /docs/websocket.md to the client.
+
+
+![](/docs/layout.png)

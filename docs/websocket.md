@@ -96,10 +96,12 @@ The player number is directly mapped to the players home and finish. The colour 
 
 The piece is defined by the position on the field. The following numbers are used:
 
-| Number  	         | Position                   	 |
-|-------------------|------------------------------|
-| 0       	         | Home                       	 |
-| 1 to 40    	      | Normal fields              	 |
-| (X-1)1  	         | Entry field for player X   	 |
-| ((X+3)%4)0      	 | Last field for player X    	 |
-| 1X1 to 1X4 	      | Finish places for player X 	 |
+| Number  	     | Position                   	 |
+|---------------|------------------------------|
+| 0       	     | Home                       	 |
+| 10 to 49    	 | Normal fields              	 |
+| X1  	         | Entry field for player X   	 |
+| X0      	     | Last field for player X    	 |
+| 1X1 to 1X4 	  | Finish places for player X 	 |
+
+![](/docs/layout.png)
