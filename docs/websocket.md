@@ -42,8 +42,8 @@ This request triggers the prompt for the player to select a move. It contains th
 
 ```json
 {
-  "player": 1,
-  "pieces": [0,0,0,0]
+    "player": 1,
+    "pieces": [0,0,0,0]
 }
 ```
 
@@ -52,26 +52,24 @@ This request triggers the prompt for the player to select a move. It contains th
 This request returns the full board state after the move has been made.
 
 ```json
-{
-  "board": [
+[
     {
-      "player": 1,
-      "pieces": [0,0,0,0]
+        "player": 1,
+        "pieces": [0,0,0,0]
     },
     {
-      "player": 2,
-      "pieces": [0,0,0,0]
+        "player": 2,
+        "pieces": [0,0,0,0]
     },
     {
-      "player": 3,
-      "pieces": [0,0,0,0]
+        "player": 3,
+        "pieces": [0,0,0,0]
     },
     {
-      "player": 4,
-      "pieces": [0,0,0,0]
+        "player": 4,
+        "pieces": [0,0,0,0]
     }
-  ]
-}
+]
 ```
 
 ### Dice Roll Trigger
@@ -98,10 +96,10 @@ The player number is directly mapped to the players home and finish. The colour 
 
 The piece is defined by the position on the field. The following numbers are used:
 
-| Number  	 | Position                   	 |
-|-----------|------------------------------|
-| 0       	 | Home                       	 |
-| 1-40    	 | Normal fields              	 |
-| (X-1)1  	 | Entry field for player X   	 |
-| X0      	 | Last field for player X    	 |
-| 1X1-1X4 	 | Finish places for player X 	 |
+| Number  	         | Position                   	 |
+|-------------------|------------------------------|
+| 0       	         | Home                       	 |
+| 1 to 40    	      | Normal fields              	 |
+| (X-1)1  	         | Entry field for player X   	 |
+| ((X+3)%4)0      	 | Last field for player X    	 |
+| 1X1 to 1X4 	      | Finish places for player X 	 |
