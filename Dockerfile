@@ -33,7 +33,7 @@ COPY --from=server-build /app/server ./server
 RUN cd server && npm install --only=production
 RUN cd web-app && npm install --only=production
 
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
