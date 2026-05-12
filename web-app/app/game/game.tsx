@@ -21,7 +21,7 @@ export default function Game() {
     const [isConnected, setIsConnected] = useState(false);
     const [socket, setSocket] = useState<Socket>();
 
-    const [roll, setRoll] = useState(false);
+    const [roll, setRoll] = useState(0);
 
     const [moveResult, setMoveResult] = useState<MoveResult[]>([]);
     const [moveSelectionRequest, setMoveSelectionRequest] = useState<MoveSelectionRequest>({player: 1, pieces: []});
@@ -58,8 +58,8 @@ export default function Game() {
         webSocket.on("diceRollRequest", (data) => {
             console.log("dice roll request received", data);
             logMessage("dice roll request received for player " + data.player);
-            setRoll(false);
-            setRoll(true);
+            setRoll(0);
+            setRoll(data.player);
         });
 
         webSocket.on("moveSelectionRequest", (data) => {
@@ -84,6 +84,17 @@ export default function Game() {
         }
     }
 
+    const createNewGame = () => {
+        const playersInput = document.getElementById("playersInput") as HTMLInputElement;
+        const players = parseInt(playersInput.value);
+
+        if (isConnected) {
+            socket!.emit("createGame", {
+                players: players,
+            });
+        }
+    };
+
     const [log, setLog] = useState<string[]>([]);
 
     const handleFieldClick = (field: BoardField) => {
@@ -100,7 +111,7 @@ export default function Game() {
 
     const handleRollResult = (result: number) => {
         console.log("Roll result:", result);
-        setRoll(false);
+        setRoll(0);
     }
 
     const triggerRoll = () => {
@@ -130,6 +141,11 @@ export default function Game() {
                 <Button variant="outline" onClick={stopListenOnWebsocket} disabled={!isConnected}>Stop listening on
                     WebSocket</Button>
                 <span>&nbsp;</span>
+
+                <input type="number" min="1" max="4" defaultValue="2" id="playersInput"/>
+                <Button variant="outline" onClick={createNewGame} disabled={!isConnected}>Create Game</Button>
+                <span>&nbsp;</span>
+
                 <Button variant="outline" onClick={triggerRoll}>Trigger Dice Roll</Button>
                 <Button variant="outline" onClick={triggerSelection}>Trigger Move Selection</Button>
                 <Button variant="outline" onClick={triggerMoveResult}>Trigger Move Result</Button>

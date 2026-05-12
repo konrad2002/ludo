@@ -8,10 +8,11 @@ import {
 import Image from "next/image";
 import {useEffect, useState} from "react";
 import {Socket} from "socket.io-client";
+import {getColourByNumber} from "@/app/game/field";
 
-export function DialogDemo({roll, socket, onRollResult}: { roll: boolean, socket?: Socket, onRollResult: (result: number) => void }) {
+export function DialogDemo({roll, socket, onRollResult}: { roll: number, socket?: Socket, onRollResult: (result: number) => void }) {
     useEffect(() => {
-        if (roll) {
+        if (roll != 0) {
             console.log("starting roll");
 
             setIsRolling(false);
@@ -22,7 +23,7 @@ export function DialogDemo({roll, socket, onRollResult}: { roll: boolean, socket
 
     useEffect(() => {
         if (socket) {
-            socket.on("rolling", (data) => {
+            socket.on("diceRolling", (data) => {
                 console.log("rolling received", data);
                 setIsRolling(true)
             });
@@ -48,19 +49,8 @@ export function DialogDemo({roll, socket, onRollResult}: { roll: boolean, socket
 
     const startRolling = () => {
         if (socket) {
-            socket.emit("roll");
+            socket.emit("diceRollTrigger");
         }
-
-        setTimeout(() => {
-            const result = Math.floor(Math.random() * 6) + 1;
-            setRollResult(result);
-            setIsRolling(false);
-
-            setTimeout(() => {
-                setOpen(false);
-                onRollResult(result);
-            }, 1000);
-        }, 2000);
     }
 
     const rollingBox = (
@@ -77,7 +67,7 @@ export function DialogDemo({roll, socket, onRollResult}: { roll: boolean, socket
             <form>
                 <DialogContent className="sm:max-w-sm" showCloseButton={false}>
                     <DialogHeader>
-                        <DialogTitle>Roll the Dice!</DialogTitle>
+                        <DialogTitle>Roll the Dice, <span className="player-icon" style={{backgroundColor: getColourByNumber(roll)}}></span>!</DialogTitle>
                         <DialogDescription>
                             Please click on the dice to roll it.
                         </DialogDescription>

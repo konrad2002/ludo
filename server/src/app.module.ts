@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import {WebsocketGateway} from "./websocket/websocket.gateway";
+import {LudoWebSocketGateway} from "./websocket/websocket.gateway";
+import {GameService} from "./game.service";
+import {EventEmitterModule} from "@nestjs/event-emitter";
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService, WebsocketGateway],
+  imports: [EventEmitterModule.forRoot()],
+  controllers: [],
+  providers: [GameService, LudoWebSocketGateway],
+  exports: [GameService]
 })
 export class AppModule {}

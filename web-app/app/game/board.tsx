@@ -3,6 +3,7 @@
 import Field, {getColourByNumber} from "@/app/game/field";
 import {useEffect, useState} from "react";
 import {MoveResult, MoveSelectionRequest} from "@/app/game/game";
+import {Button} from "@/components/ui/button";
 
 export type BoardField = {
     id: number;
@@ -183,7 +184,7 @@ export default function Board({moveResults, moveSelectionRequest, onFieldClick}:
 
     return <>
 
-        <button onClick={() => setShowNumbers(!showNumbers)}>Toggle numbers</button>
+        <Button variant="outline" onClick={() => setShowNumbers(!showNumbers)}>Toggle numbers</Button>
 
         <div style={{width: "800px", height: "800px", position: "relative"}}>
 

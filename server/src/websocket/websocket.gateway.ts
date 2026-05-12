@@ -4,11 +4,14 @@ import {
     SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
-    WsResponse,
 } from '@nestjs/websockets';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Server, Socket } from 'socket.io';
+import {Server, Socket} from 'socket.io';
+import {EventEmitter2, OnEvent} from "@nestjs/event-emitter";
+import {Player} from "../types/player.type";
+
+type GameCreationRequest = {
+    players: number;
+}
 
 @WebSocketGateway({
     cors: {
@@ -16,9 +19,12 @@ import { Server, Socket } from 'socket.io';
     },
     namespace: 'ws',
 })
-export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class LudoWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
+
+    constructor(private readonly events: EventEmitter2) {
+    }
 
     handleConnection(client: Socket) {
         console.log(`Client connected: ${client.id}`);
@@ -28,61 +34,70 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
         console.log(`Client disconnected: ${client.id}`);
     }
 
-    @SubscribeMessage('message')
-    handleMessage(
-        @MessageBody() data: string,
+    @SubscribeMessage('createGame')
+    handleCreateGame(
+        @MessageBody() data: GameCreationRequest,
         @ConnectedSocket() client: Socket,
     ) {
-        console.log(`Message from ${client.id}: ${data}`);
+        console.log(`Create game request from ${client.id} with ${data.players} players`);
 
-        // Send to ALL connected clients
-        this.server.emit('message', {
-            clientId: client.id,
-            message: data,
-        });
+        this.events.emit("game.create", data.players);
     }
 
-    @SubscribeMessage('triggerRoll')
-    handleTriggerRoll(
-        @ConnectedSocket() client: Socket,
-    ) {
-        console.log(`Trigger roll from ${client.id}`);
+    // The following events are called by the game service to trigger websocket requests to the clients
 
+    @OnEvent("game.created")
+    onGameCreated(players: Player[], numOfPlayers: number) {
+        this.sendMessage("Game created with " + numOfPlayers + " players")
+        this.onMoveResult(players)
+    }
+
+    @OnEvent("dice.roll-request")
+    onDiceRollRequest(player: number) {
         this.server.emit('diceRollRequest', {
-            player: 1,
+            player: player,
         });
     }
 
-    @SubscribeMessage('roll')
+    @OnEvent("dice.rolling")
+    onDiceRolling() {
+        this.server.emit('diceRolling', true);
+    }
+
+    @OnEvent("dice.roll-result")
+    onDiceRollResult(result: number) {
+        this.server.emit('diceRollResult', {
+            dice: result,
+        });
+    }
+
+    @OnEvent("move.selection-request")
+    onMoveSelectionRequest(player: number, options: number[]) {
+        this.server.emit('moveSelectionRequest', {
+            "player": player,
+            "pieces": options
+        });
+    }
+
+    @OnEvent("move.result")
+    onMoveResult(result: Player[]) {
+        this.server.emit('moveResult', result);
+    }
+
+    sendMessage(message: string) {
+        this.server.emit('message', {
+            message: message,
+        });
+    }
+
+
+    @SubscribeMessage('diceRollTrigger')
     handleRoll(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
         console.log(`Roll request from ${client.id}: ${data}`);
 
-
-        this.server.emit('rolling', true);
-
-        setTimeout(() => {
-            const result = Math.floor(Math.random() * 6) + 1;
-
-            console.log(`Roll result for ${client.id}: ${result}`);
-
-            this.server.emit('diceRollResult', {
-                dice: result,
-            });
-        }, 2000);
+        this.events.emit("dice.roll");
     }
 
-
-    @SubscribeMessage('triggerSelection')
-    handleTriggerSelection(
-        @ConnectedSocket() client: Socket,
-    ) {
-        console.log(`Trigger selection from ${client.id}`);
-
-        this.server.emit('moveSelectionRequest', {
-            "player": 2,
-            "pieces": [22,27,0,123]
-        });
-    }
 
     @SubscribeMessage('moveSelection')
     handleMoveSelection(
@@ -91,49 +106,7 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
     ) {
         console.log(`Received move selection from ${client.id}: ${data.piece}`);
 
-        this.server.emit('moveResult', [
-            {
-                "player": 1,
-                "pieces": [0,0,0,0]
-            },
-            {
-                "player": 2,
-                "pieces": [22,27,0,123]
-            },
-            {
-                "player": 3,
-                "pieces": [0,0,0,0]
-            },
-            {
-                "player": 4,
-                "pieces": [41,0,0,0]
-            }
-        ]);
+        this.events.emit("move.select", data.piece);
     }
 
-    @SubscribeMessage('triggerMoveResult')
-    handleTriggerMoveResult(
-        @ConnectedSocket() client: Socket,
-    ) {
-        console.log(`Trigger move result from ${client.id}`);
-
-        this.server.emit('moveResult', [
-            {
-                "player": 1,
-                "pieces": [0,0,0,0]
-            },
-            {
-                "player": 2,
-                "pieces": [22,27,0,123]
-            },
-            {
-                "player": 3,
-                "pieces": [0,0,0,0]
-            },
-            {
-                "player": 4,
-                "pieces": [41,0,0,0]
-            }
-        ]);
-    }
 }
