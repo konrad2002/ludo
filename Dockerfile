@@ -27,8 +27,8 @@ WORKDIR /app
 
 RUN apk add --no-cache nginx bash
 
-COPY --from=web-build /app/web-app ./
-COPY --from=server-build /app/server ./server
+COPY --from=web-build /app/web-app /app/web-app
+COPY --from=server-build /app/server /app/server
 
 RUN cd server && npm install --only=production
 RUN cd web-app && npm install --only=production
