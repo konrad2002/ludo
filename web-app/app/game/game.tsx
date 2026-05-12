@@ -34,7 +34,7 @@ export default function Game() {
     }
 
     const startListenOnWebsocket = () => {
-        const webSocket = io("http://localhost:3001/ws")
+        const webSocket = io("/ws")
         setSocket(webSocket);
 
         webSocket.on("connect", () => {
