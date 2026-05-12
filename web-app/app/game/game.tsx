@@ -4,11 +4,14 @@ import Board, {BoardField} from "@/app/game/board";
 import {io, Socket} from "socket.io-client";
 import {useState} from "react";
 import {Button} from "@/components/ui/button";
+import {DialogDemo} from "@/app/game/dice-dialog";
 
 export default function Game() {
 
     const [isConnected, setIsConnected] = useState(false);
     const [socket, setSocket] = useState<Socket>();
+
+    const [roll, setRoll] = useState(false);
 
     const logMessage = (message: string) => {
         setLog((prev) => [
@@ -56,12 +59,25 @@ export default function Game() {
         }
     };
 
+    const handleRollResult = (result: number) => {
+        console.log("Roll result:", result);
+        setRoll(false);
+
+        if (isConnected) {
+            socket!.emit("message", "rolled a " + result);
+        }
+    }
+
     return <div className="game">
 
         <div className="board-container">
             <div className="buttons">
                 <Button variant="outline" onClick={startListenOnWebsocket} disabled={isConnected}>Start listening on WebSocket</Button>
                 <Button variant="outline" onClick={stopListenOnWebsocket} disabled={!isConnected}>Stop listening on WebSocket</Button>
+
+                <Button variant="outline" onClick={() => setRoll(true)}>Dice Roll</Button>
+
+                <DialogDemo roll={roll} socket={socket} onRollResult={handleRollResult}/>
             </div>
 
 

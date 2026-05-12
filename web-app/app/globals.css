@@ -138,7 +138,7 @@
 .board-container {
   width: 100%;
   display: grid;
-  grid-template-rows: 100px auto;
+  grid-template-rows: auto auto;
 }
 
 .buttons * {
