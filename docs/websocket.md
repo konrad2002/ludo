@@ -5,18 +5,22 @@ This file defines the information that is sent over the websocket for both clien
 ## Server to Client
 
 1. Dice Roll Request
-2. Dice Roll Result
-3. Move Selection Request
-4. Move Result
+2. Dice Rolling
+3. Dice Roll Result
+4. Move Selection Request
+5. Move Result
 
 ## Client to Server
 
-1. Dice Roll Trigger
-2. Move Selection
+1. Create Game
+2. Dice Roll Trigger
+3. Move Selection
 
 ## Data
 
 ### Dice Roll Request
+
+Channel: `diceRollRequest`
 
 This request triggers the dice roll prompt at the client for a defined colour.
 
@@ -26,7 +30,15 @@ This request triggers the dice roll prompt at the client for a defined colour.
 }
 ```
 
+### Dice Rolling
+
+Channel: `diceRolling`
+
+This request tells the player to trigger the dice rolling animation.
+
 ### Dice Roll Result
+
+Channel: `diceRollResult`
 
 This request tells the player the result of the dice roll.
 
@@ -38,6 +50,8 @@ This request tells the player the result of the dice roll.
 
 ### Move Selection Request
 
+Channel: `moveSelectionRequest`
+
 This request triggers the prompt for the player to select a move. It contains the pieces that can be moved defined by their position on the field.
 
 ```json
@@ -48,6 +62,8 @@ This request triggers the prompt for the player to select a move. It contains th
 ```
 
 ### Move Result
+
+Channel: `moveResult`
 
 This request returns the full board state after the move has been made.
 
@@ -72,11 +88,27 @@ This request returns the full board state after the move has been made.
 ]
 ```
 
+### Create Game
+
+Channel: `createGame`
+
+Create a new game with x players
+
+```json
+{
+  "players": 4
+}
+```
+
 ### Dice Roll Trigger
+
+Channel: `diceRollTrigger`
 
 This triggers the generation of a random number at the server.
 
 ### Move Selection
+
+Channel: `moveSelection`
 
 This request tells the server which piece to move.
 
