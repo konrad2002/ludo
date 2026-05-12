@@ -1,10 +1,12 @@
+"use client";
+
 import styles from "./field.module.css";
 import {BoardField} from "@/app/game/board";
 
-type FieldProps = { field: BoardField, showNumbers: boolean };
+type FieldProps = { field: BoardField, showNumbers: boolean, onFieldClick: (field: BoardField) => void };
 
 export default function Field(props: FieldProps) {
-    const {field, showNumbers} = props;
+    const {field, showNumbers, onFieldClick} = props;
 
     function getBackColour() {
         if (field.isHighlighted) {
@@ -22,5 +24,5 @@ export default function Field(props: FieldProps) {
         return "white";
     }
 
-    return <div className={styles.field} style={{backgroundColor: getBackColour()}}>{showNumbers ? field.number : ''}</div>;
+    return <div className={styles.field} style={{backgroundColor: getBackColour()}} onClick={() => {onFieldClick(field)}}>{showNumbers ? field.number : ''}</div>;
 }

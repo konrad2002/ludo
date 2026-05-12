@@ -1,32 +1,79 @@
 'use client';
 
-import Board from "@/app/game/board";
+import Board, {BoardField} from "@/app/game/board";
+import {io, Socket} from "socket.io-client";
+import {useState} from "react";
+import {Button} from "@/components/ui/button";
 
 export default function Game() {
 
-    const startListenOnWebsocket = () => {
-        const socket = new WebSocket('ws://localhost:3001/ws');
-        socket.addEventListener('open', function (event) {
-            console.log('WebSocket connection opened');
-        });
-        socket.addEventListener('message', function (event) {
-            console.log('Message from server ', event.data);
-            log.push((new Date()).toString() + "> " + event.data)
-        });
+    const [isConnected, setIsConnected] = useState(false);
+    const [socket, setSocket] = useState<Socket>();
+
+    const logMessage = (message: string) => {
+        setLog((prev) => [
+            ...prev,
+            `${new Date().toLocaleString()}: ${message}`
+        ]);
     }
 
-    const log: Array<string> = [];
+    const startListenOnWebsocket = () => {
+        const webSocket = io("http://localhost:3001/ws")
+        setSocket(webSocket);
 
-    const logEntries = log.map((log) => {
-        return <span className="log-entry">{log}</span>
-    })
+        webSocket.on("connect", () => {
+            console.log("connected");
+            setIsConnected(true);
+            logMessage("connected");
+            webSocket.emit("message", "Hello from client!");
+        });
 
-    return <div className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between">
+        webSocket.on("message", (data) => {
+            console.log("message received", data);
+            logMessage(data.message);
+        });
 
-        <button onClick={startListenOnWebsocket}>Start listening on WebSocket</button>
+        webSocket.on("disconnect", () => {
+            console.log("disconnected");
+            setIsConnected(false);
+            logMessage("disconnected");
+        })
+    }
 
-        <Board/>
+    const stopListenOnWebsocket = () => {
+        if (socket) {
+            socket.disconnect();
+        }
+    }
 
-        {logEntries}
+    const [log, setLog] = useState<string[]>([]);
+
+    const handleFieldClick = (field: BoardField) => {
+        console.log("Field clicked:", field);
+
+        if (isConnected) {
+            socket!.emit("message", "pressed field " + field.number);
+        }
+    };
+
+    return <div className="game">
+
+        <div className="board-container">
+            <div className="buttons">
+                <Button variant="outline" onClick={startListenOnWebsocket} disabled={isConnected}>Start listening on WebSocket</Button>
+                <Button variant="outline" onClick={stopListenOnWebsocket} disabled={!isConnected}>Stop listening on WebSocket</Button>
+            </div>
+
+
+            <Board onFieldClick={handleFieldClick}/>
+        </div>
+
+        <div className="log">
+            {log.map((entry, index) => (
+                <span key={index} className="log-entry">
+                    {entry}
+                </span>
+            ))}
+        </div>
     </div>
 }

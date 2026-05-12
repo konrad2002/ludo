@@ -14,7 +14,7 @@ export type BoardField = {
     colour: number;
 }
 
-export default function Board() {
+export default function Board({ onFieldClick }: { onFieldClick: (field: BoardField) => void }) {
 
     const [showNumbers, setShowNumbers] = useState(true);
 
@@ -95,14 +95,14 @@ export default function Board() {
 
     const normalFields = boardFields.map(field => (
         <div key={field.id ?? field.number} style={{top: `${field.position.x * 50}px`, left: `${field.position.y * 50}px`, position: "absolute", width: "50px", height: "50px", padding: "5px"}}>
-            <Field field={field} showNumbers={showNumbers}/>
+            <Field field={field} showNumbers={showNumbers} onFieldClick={onFieldClick}/>
         </div>
     ));
     return <>
 
         <button onClick={() => setShowNumbers(!showNumbers)}>Toggle numbers</button>
 
-        <div style={{width: "1000px", height: "1000px", position: "relative"}}>
+        <div style={{width: "800px", height: "800px", position: "relative"}}>
 
             {normalFields}
 
