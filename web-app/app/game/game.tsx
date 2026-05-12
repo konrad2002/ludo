@@ -41,6 +41,13 @@ export default function Game() {
             setIsConnected(false);
             logMessage("disconnected");
         })
+
+        webSocket.on("diceRollRequest", (data) => {
+            console.log("dice roll request received", data);
+            logMessage("dice roll request received for player " + data.player);
+            setRoll(false);
+            setRoll(true);
+        });
     }
 
     const stopListenOnWebsocket = () => {
@@ -62,9 +69,11 @@ export default function Game() {
     const handleRollResult = (result: number) => {
         console.log("Roll result:", result);
         setRoll(false);
+    }
 
+    const triggerRoll = () => {
         if (isConnected) {
-            socket!.emit("message", "rolled a " + result);
+            socket!.emit("triggerRoll");
         }
     }
 
@@ -75,7 +84,7 @@ export default function Game() {
                 <Button variant="outline" onClick={startListenOnWebsocket} disabled={isConnected}>Start listening on WebSocket</Button>
                 <Button variant="outline" onClick={stopListenOnWebsocket} disabled={!isConnected}>Stop listening on WebSocket</Button>
 
-                <Button variant="outline" onClick={() => setRoll(true)}>Dice Roll</Button>
+                <Button variant="outline" onClick={triggerRoll}>Dice Roll</Button>
 
                 <DialogDemo roll={roll} socket={socket} onRollResult={handleRollResult}/>
             </div>

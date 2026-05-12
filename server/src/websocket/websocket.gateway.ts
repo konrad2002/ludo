@@ -42,6 +42,35 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
         });
     }
 
+    @SubscribeMessage('triggerRoll')
+    handleTriggerRoll(
+        @ConnectedSocket() client: Socket,
+    ) {
+        console.log(`Trigger roll from ${client.id}`);
+
+        this.server.emit('diceRollRequest', {
+            player: 1,
+        });
+    }
+
+    @SubscribeMessage('roll')
+    handleRoll(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
+        console.log(`Roll request from ${client.id}: ${data}`);
+
+
+        this.server.emit('rolling', true);
+
+        setTimeout(() => {
+            const result = Math.floor(Math.random() * 6) + 1;
+
+            console.log(`Roll result for ${client.id}: ${result}`);
+
+            this.server.emit('diceRollResult', {
+                dice: result,
+            });
+        }, 2000);
+    }
+
     @SubscribeMessage('events')
     findAll(@MessageBody() data: any): Observable<WsResponse<number>> {
         return from([1, 2, 3]).pipe(map(item => ({ event: 'events', data: item })));

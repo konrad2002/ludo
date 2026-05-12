@@ -1,11 +1,9 @@
-import {Button} from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import Image from "next/image";
 import {useEffect, useState} from "react";
@@ -22,6 +20,26 @@ export function DialogDemo({roll, socket, onRollResult}: { roll: boolean, socket
         }
     }, [roll]);
 
+    useEffect(() => {
+        if (socket) {
+            socket.on("rolling", (data) => {
+                console.log("rolling received", data);
+                setIsRolling(true)
+            });
+
+            socket.on("diceRollResult", (data) => {
+                console.log("roll result received", data.dice);
+                setIsRolling(false);
+                setRollResult(data.dice);
+
+                setTimeout(() => {
+                    setOpen(false);
+                    onRollResult(data.dice);
+                }, 1000);
+            });
+        }
+    }, [socket]);
+
     const [isRolling, setIsRolling] = useState(false);
 
     const [rollResult, setRollResult] = useState<number | null>(null);
@@ -29,8 +47,9 @@ export function DialogDemo({roll, socket, onRollResult}: { roll: boolean, socket
     const [open, setOpen] = useState(false);
 
     const startRolling = () => {
-        setIsRolling(true);
-        setRollResult(null);
+        if (socket) {
+            socket.emit("roll");
+        }
 
         setTimeout(() => {
             const result = Math.floor(Math.random() * 6) + 1;
