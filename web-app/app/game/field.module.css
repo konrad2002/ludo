@@ -3,8 +3,9 @@
     height: 100%;
     border-radius: 50%;
     color: black;
-    background-color: white;
+    background-color: #ddd;
     text-align: center;
     font-size: 100%;
     line-height: 36px;
+    border: 4px solid;
 }

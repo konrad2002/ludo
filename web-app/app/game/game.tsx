@@ -6,12 +6,25 @@ import {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {DialogDemo} from "@/app/game/dice-dialog";
 
+export interface MoveResult {
+    player: number;
+    pieces: number[];
+}
+
+export interface MoveSelectionRequest {
+    player: number;
+    pieces: number[];
+}
+
 export default function Game() {
 
     const [isConnected, setIsConnected] = useState(false);
     const [socket, setSocket] = useState<Socket>();
 
     const [roll, setRoll] = useState(false);
+
+    const [moveResult, setMoveResult] = useState<MoveResult[]>([]);
+    const [moveSelectionRequest, setMoveSelectionRequest] = useState<MoveSelectionRequest>({player: 1, pieces: []});
 
     const logMessage = (message: string) => {
         setLog((prev) => [
@@ -48,6 +61,21 @@ export default function Game() {
             setRoll(false);
             setRoll(true);
         });
+
+        webSocket.on("moveSelectionRequest", (data) => {
+            console.log("move selection request received", data);
+            logMessage("move selection request received for player " + data.player);
+
+            setMoveSelectionRequest(data);
+        });
+
+        webSocket.on("moveResult", (data) => {
+            console.log("move result received", data);
+            logMessage("move result received: " + JSON.stringify(data));
+
+            setMoveSelectionRequest({player: 1, pieces: []});
+            setMoveResult(data);
+        });
     }
 
     const stopListenOnWebsocket = () => {
@@ -62,7 +90,11 @@ export default function Game() {
         console.log("Field clicked:", field);
 
         if (isConnected) {
-            socket!.emit("message", "pressed field " + field.number);
+            if (field.isHighlighted) {
+                socket!.emit("moveSelection", {
+                    piece: field.number
+                });
+            }
         }
     };
 
@@ -77,20 +109,37 @@ export default function Game() {
         }
     }
 
+    const triggerSelection = () => {
+        if (isConnected) {
+            socket!.emit("triggerSelection");
+        }
+    }
+
+    const triggerMoveResult = () => {
+        if (isConnected) {
+            socket!.emit("triggerMoveResult");
+        }
+    }
+
     return <div className="game">
 
         <div className="board-container">
             <div className="buttons">
-                <Button variant="outline" onClick={startListenOnWebsocket} disabled={isConnected}>Start listening on WebSocket</Button>
-                <Button variant="outline" onClick={stopListenOnWebsocket} disabled={!isConnected}>Stop listening on WebSocket</Button>
-
-                <Button variant="outline" onClick={triggerRoll}>Dice Roll</Button>
+                <Button variant="outline" onClick={startListenOnWebsocket} disabled={isConnected}>Start listening on
+                    WebSocket</Button>
+                <Button variant="outline" onClick={stopListenOnWebsocket} disabled={!isConnected}>Stop listening on
+                    WebSocket</Button>
+                <span>&nbsp;</span>
+                <Button variant="outline" onClick={triggerRoll}>Trigger Dice Roll</Button>
+                <Button variant="outline" onClick={triggerSelection}>Trigger Move Selection</Button>
+                <Button variant="outline" onClick={triggerMoveResult}>Trigger Move Result</Button>
 
                 <DialogDemo roll={roll} socket={socket} onRollResult={handleRollResult}/>
             </div>
 
 
-            <Board onFieldClick={handleFieldClick}/>
+            <Board onFieldClick={handleFieldClick} moveResults={moveResult}
+                   moveSelectionRequest={moveSelectionRequest}/>
         </div>
 
         <div className="log">

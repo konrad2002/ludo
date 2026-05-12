@@ -71,13 +71,69 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
         }, 2000);
     }
 
-    @SubscribeMessage('events')
-    findAll(@MessageBody() data: any): Observable<WsResponse<number>> {
-        return from([1, 2, 3]).pipe(map(item => ({ event: 'events', data: item })));
+
+    @SubscribeMessage('triggerSelection')
+    handleTriggerSelection(
+        @ConnectedSocket() client: Socket,
+    ) {
+        console.log(`Trigger selection from ${client.id}`);
+
+        this.server.emit('moveSelectionRequest', {
+            "player": 2,
+            "pieces": [22,27,0,123]
+        });
     }
 
-    @SubscribeMessage('identity')
-    async identity(@MessageBody() data: number): Promise<number> {
-        return data;
+    @SubscribeMessage('moveSelection')
+    handleMoveSelection(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: any
+    ) {
+        console.log(`Received move selection from ${client.id}: ${data.piece}`);
+
+        this.server.emit('moveResult', [
+            {
+                "player": 1,
+                "pieces": [0,0,0,0]
+            },
+            {
+                "player": 2,
+                "pieces": [22,27,0,123]
+            },
+            {
+                "player": 3,
+                "pieces": [0,0,0,0]
+            },
+            {
+                "player": 4,
+                "pieces": [41,0,0,0]
+            }
+        ]);
+    }
+
+    @SubscribeMessage('triggerMoveResult')
+    handleTriggerMoveResult(
+        @ConnectedSocket() client: Socket,
+    ) {
+        console.log(`Trigger move result from ${client.id}`);
+
+        this.server.emit('moveResult', [
+            {
+                "player": 1,
+                "pieces": [0,0,0,0]
+            },
+            {
+                "player": 2,
+                "pieces": [22,27,0,123]
+            },
+            {
+                "player": 3,
+                "pieces": [0,0,0,0]
+            },
+            {
+                "player": 4,
+                "pieces": [41,0,0,0]
+            }
+        ]);
     }
 }
