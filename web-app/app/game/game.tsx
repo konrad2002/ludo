@@ -5,7 +5,7 @@ import Board from "@/app/game/board";
 export default function Game() {
 
     const startListenOnWebsocket = () => {
-        const socket = new WebSocket('ws://localhost:8080/ws');
+        const socket = new WebSocket('ws://localhost:3001/ws');
         socket.addEventListener('open', function (event) {
             console.log('WebSocket connection opened');
         });
